@@ -17,6 +17,7 @@
   </properties>
   <modules>
     <module>MicroOne</module>
+    <module>MicroTwo</module>
   </modules>
   <dependencies>
     <!-- Здесь указываются зависимости для проекта -->

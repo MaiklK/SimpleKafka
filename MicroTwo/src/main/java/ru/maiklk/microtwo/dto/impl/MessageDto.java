@@ -1,6 +1,7 @@
-package ru.maiklk.microtwo.dto;
+package ru.maiklk.microtwo.dto.impl;
 
 import lombok.*;
+import ru.maiklk.microtwo.dto.AbstractDto;
 
 @Builder
 @Getter

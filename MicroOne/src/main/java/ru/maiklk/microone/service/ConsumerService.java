@@ -1,7 +1,10 @@
 package ru.maiklk.microone.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -12,19 +15,22 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import ru.maiklk.microone.dto.IndividualDto;
 import ru.maiklk.microone.dto.MessageDto;
+import ru.maiklk.microone.service.impl.IndividualServiceImpl;
+import ru.maiklk.microone.service.impl.MessageServiceImpl;
 import ru.maiklk.microone.util.ConverterDto;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConsumerService {
 
-    private static final String TOPIC_USER = "${topic_user}";
+    private final String TOPIC_USER = "${topic_user}";
     private static final String TOPIC_MESSAGE = "${topic_message}";
     private static final String GROUP_ID = "${group_id}";
-    private final ConverterDto converterDto;
-    private final IndividualServiceImpl individualService;
-    private final MessageServiceImpl messageService;
+    ConverterDto converterDto;
+    IndividualServiceImpl individualService;
+    MessageServiceImpl messageService;
 
     @KafkaListener(topics = TOPIC_USER, groupId = GROUP_ID)
     public void consumerUser(String message) {
@@ -42,17 +48,16 @@ public class ConsumerService {
 
     //паттерн ретрай и DLQ
     @RetryableTopic(
-            attempts = "3",
             backoff = @Backoff(delay = 1000, multiplier = 5.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
     @KafkaListener(topics = TOPIC_MESSAGE, groupId = GROUP_ID)
     public void listen(String in, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.warn(in + " from " + topic);
+        log.warn("{} from {}", in, topic);
         throw new RuntimeException("ERROR!!!!");
     }
 
     @DltHandler
     public void dlt(String in, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.error(in + " from " + topic);
+        log.error("{} from {}", in, topic);
     }
 }

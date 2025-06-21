@@ -5,13 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.maiklk.microtwo.dto.AbstractDto;
-import ru.maiklk.microtwo.dto.IndividualDto;
-import ru.maiklk.microtwo.dto.MessageDto;
+import ru.maiklk.microtwo.dto.impl.MessageDto;
+import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
 
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
-
     private final KafkaTemplate<String, AbstractDto> kafkaIndividual;
 
     @Value("${topic_user}")
@@ -20,13 +19,11 @@ public class KafkaService {
     private String TOPIC_MESSAGE;
 
     public void send(AbstractDto abstractDto) {
-        if (abstractDto instanceof IndividualDto) {
+        if (abstractDto instanceof TelegramUserDto) {
             kafkaIndividual.send(TOPIC_USER, abstractDto);
         }
         if (abstractDto instanceof MessageDto) {
             kafkaIndividual.send(TOPIC_MESSAGE, abstractDto);
         }
-
     }
-
 }

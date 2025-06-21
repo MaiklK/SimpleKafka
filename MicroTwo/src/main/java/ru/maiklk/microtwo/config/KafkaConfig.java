@@ -28,11 +28,6 @@ public class KafkaConfig {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         //Kafka сама решает когда создавать новые партиции, на основе ключа или нагрузки
         properties.put(ProducerConfig.PARTITIONER_ADPATIVE_PARTITIONING_ENABLE_CONFIG, true);
-//        Можно реализовать Partitioner из пакета org.apache.kafka.clients.producer и каждая партиция
-//        будет со своей логикой
-//        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG)
-//        по умолчанию ключ сообщения кафки является партицией
-//        properties.put(ProducerConfig.PARTITIONER_IGNORE_KEYS_CONFIG)
         return new DefaultKafkaProducerFactory<>(properties);
     }
 

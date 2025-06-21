@@ -1,17 +1,16 @@
 package ru.maiklk.microtwo.util;
 
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.maiklk.microtwo.dto.MessageDto;
+import ru.maiklk.microtwo.dto.impl.MessageDto;
 
 import java.util.Random;
 
+@NoArgsConstructor
 @Component
 public class MessageGenerator {
 
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    private MessageGenerator() {
-    }
 
     private static final Random random = new Random();
 

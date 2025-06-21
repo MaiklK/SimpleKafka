@@ -14,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 @Table
-public class Individual {
+public class TelegramUser {
     @Id
     private long id;
     @Column

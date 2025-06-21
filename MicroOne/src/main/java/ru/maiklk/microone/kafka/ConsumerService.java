@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -18,21 +17,21 @@ import ru.maiklk.microone.dto.AbstractDto;
 import ru.maiklk.microone.dto.impl.MessageDto;
 import ru.maiklk.microone.dto.impl.TelegramUserDto;
 import ru.maiklk.microone.exception.KafkaMessageProcessingException;
-import ru.maiklk.microone.service.impl.IndividualServiceImpl;
+import ru.maiklk.microone.service.impl.TelegramUserServiceImpl;
 import ru.maiklk.microone.service.impl.MessageServiceImpl;
 import ru.maiklk.microone.util.ConverterDto;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConsumerService {
 
-    private final String TOPIC_USER = "${topic_user}";
+    private static final String TOPIC_USER = "${topic_user}";
     private static final String TOPIC_MESSAGE = "${topic_message}";
     private static final String GROUP_ID = "${group_id}";
     ConverterDto converterDto;
-    IndividualServiceImpl individualService;
+    TelegramUserServiceImpl individualService;
     MessageServiceImpl messageService;
 
     @Transactional
@@ -43,8 +42,8 @@ public class ConsumerService {
     @KafkaListener(topics = TOPIC_USER, groupId = GROUP_ID)
     public void consumerUser(String message) {
         try {
-            TelegramUserDto dto = converterDto.convertToUserVkDto(message);
-            individualService.save(converterDto.fromDtoToIndividual(dto));
+            TelegramUserDto dto = converterDto.convertToTelegramUserDto(message);
+            individualService.saveMessage(converterDto.fromDtoToTelegramUser(dto));
             logSuccess(dto, TOPIC_USER);
         } catch (Exception e) {
             handleProcessingError(e, TOPIC_USER, message);
@@ -60,7 +59,7 @@ public class ConsumerService {
     public void consumerMessage(String message) {
         try {
             MessageDto dto = converterDto.convertToMessageDto(message);
-            messageService.save(converterDto.fromDtoToMessage(dto));
+            messageService.saveMessage(converterDto.fromDtoToMessage(dto));
             logSuccess(dto, TOPIC_MESSAGE);
         } catch (Exception e) {
             handleProcessingError(e, TOPIC_MESSAGE, message);

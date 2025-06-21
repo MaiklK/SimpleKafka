@@ -10,5 +10,9 @@ public record MessageDto(
         int messageId,
         String text
 ) implements AbstractDto {
+    @Override
+    public String getTopicName() {
+        return "telegram_message";
+    }
 }
 

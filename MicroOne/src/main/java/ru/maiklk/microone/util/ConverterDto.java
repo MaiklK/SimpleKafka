@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.maiklk.microone.dto.impl.MessageDto;
 import ru.maiklk.microone.dto.impl.TelegramUserDto;
@@ -15,8 +14,8 @@ import ru.maiklk.microone.entity.TelegramUser;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConverterDto {
     ObjectMapper objectMapper;
     ModelMapper modelMapper;
@@ -30,7 +29,7 @@ public class ConverterDto {
         }
     }
 
-    public TelegramUserDto convertToUserVkDto(String json) {
+    public TelegramUserDto convertToTelegramUserDto(String json) {
         return fromJson(json, TelegramUserDto.class);
     }
 
@@ -38,7 +37,7 @@ public class ConverterDto {
         return fromJson(json, MessageDto.class);
     }
 
-    public TelegramUser fromDtoToIndividual(TelegramUserDto telegramUserDto) {
+    public TelegramUser fromDtoToTelegramUser(TelegramUserDto telegramUserDto) {
         return modelMapper.map(telegramUserDto, TelegramUser.class);
     }
 

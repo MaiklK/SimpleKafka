@@ -1,29 +1,33 @@
 package ru.maiklk.microtwo.kafka;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.maiklk.microtwo.dto.AbstractDto;
-import ru.maiklk.microtwo.dto.impl.MessageDto;
-import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
+import ru.maiklk.microtwo.exception.KafkaMessageProcessingException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProducerService {
-    private final KafkaTemplate<String, AbstractDto> kafkaTemplate;
-
-    @Value("${topic_user}")
-    private String TOPIC_USER;
-    @Value("${topic_message}")
-    private String TOPIC_MESSAGE;
+    KafkaTemplate<String, AbstractDto> kafkaTemplate;
 
     public void send(AbstractDto abstractDto) {
-        if (abstractDto instanceof TelegramUserDto) {
-            kafkaTemplate.send(TOPIC_USER, abstractDto);
+        if (abstractDto == null) {
+            log.warn("Ошибка отправки сообщения в Kafka. Передаваемый объект null");
+            return;
         }
-        if (abstractDto instanceof MessageDto) {
-            kafkaTemplate.send(TOPIC_MESSAGE, abstractDto);
+        String topic = abstractDto.getTopicName();
+        try {
+            kafkaTemplate.send(topic, abstractDto);
+            log.debug("Сообщение отправлено в топик {}", topic);
+        } catch (Exception e) {
+            log.error("Ошибка отправки сообщения {}. Сообщение не отправлено.", e.getMessage());
+            throw new KafkaMessageProcessingException(e.getMessage(), e);
         }
     }
 }

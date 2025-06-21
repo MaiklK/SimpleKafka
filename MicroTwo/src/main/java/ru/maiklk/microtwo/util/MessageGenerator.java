@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.maiklk.microtwo.dto.impl.MessageDto;
 
+import java.time.Instant;
 import java.util.Random;
 
 @NoArgsConstructor
@@ -11,6 +12,12 @@ import java.util.Random;
 public class MessageGenerator {
 
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final int MIN_TEXT_LENGTH = 3;
+    private static final int MAX_TEXT_LENGTH = 50;
+    private static final long MIN_CHAT_ID = 1_000_000L;
+    private static final long MAX_CHAT_ID = 9_999_999L;
+    private static final int MIN_MESSAGE_ID = 1;
+    private static final int MAX_MESSAGE_ID = 100_000;
 
     private static final Random random = new Random();
 
@@ -19,26 +26,29 @@ public class MessageGenerator {
                 .chatId(generateRandomChatId())
                 .date(generateRandomDate())
                 .messageId(generateRandomMessageId())
-                .text(generateRandomText(random.nextInt(0, 10)))
+                .text(generateRandomText(random.nextInt(MIN_TEXT_LENGTH, MAX_TEXT_LENGTH + 1)))
                 .build();
     }
 
-    private static int generateRandomChatId() {
-        return random.nextInt();
+    private long generateRandomChatId() {
+        return MIN_CHAT_ID + (long) (random.nextDouble() * (MAX_CHAT_ID - MIN_CHAT_ID + 1));
     }
 
-    private static int generateRandomDate() {
-        return random.nextInt();
+    private int generateRandomDate() {
+        long now = Instant.now().getEpochSecond();
+        long thirtyDays = 30L * 24 * 60 * 60;
+        return (int) (now - random.nextInt((int) thirtyDays));
     }
 
-    private static int generateRandomMessageId() {
-        return random.nextInt();
+    private int generateRandomMessageId() {
+        return random.nextInt(MIN_MESSAGE_ID, MAX_MESSAGE_ID + 1);
     }
 
-    public static String generateRandomText(int length) {
-        return random.ints(length, 0, CHARACTERS.length())
-                .mapToObj(CHARACTERS::charAt)
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                .toString();
+    public String generateRandomText(int length) {
+         StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        return sb.toString();
     }
 }

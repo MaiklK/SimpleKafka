@@ -11,4 +11,8 @@ public record TelegramUserDto(
         String userName,
         String languageCode
 ) implements AbstractDto {
+    @Override
+    public String getTopicName() {
+        return "telegram_user";
+    }
 }

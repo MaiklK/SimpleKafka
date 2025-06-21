@@ -39,16 +39,17 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
             Message message = update.getMessage();
-            TelegramUserDto user = userBuilder(message);
+            TelegramUserDto telegramUserDto = userBuilder(message);
             MessageDto messageDto = messageBuilder(message);
 
             if ("/start".equals(message.getText())) {
+                producerService.send(telegramUserDto);
                 sendMessage(message.getChatId());
-                producerService.send(user);
             } else {
+                producerService.send(messageDto);
                 replyMessage(message.getChatId(), message.getMessageId());
             }
-            producerService.send(messageDto);
+
         }
     }
 
@@ -73,7 +74,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void replyMessage(long chatId, int messageId) {
-        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "\uD83C\uDF85");
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "отправил твое сообщение в кафку");
         sendMessage.setReplyToMessageId(messageId);
         executeSendMessage(sendMessage);
     }

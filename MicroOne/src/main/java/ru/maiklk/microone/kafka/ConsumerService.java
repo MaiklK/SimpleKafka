@@ -1,4 +1,4 @@
-package ru.maiklk.microone.service;
+package ru.maiklk.microone.kafka;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
-import ru.maiklk.microone.dto.IndividualDto;
 import ru.maiklk.microone.dto.MessageDto;
+import ru.maiklk.microone.dto.TelegramUserDto;
 import ru.maiklk.microone.service.impl.IndividualServiceImpl;
 import ru.maiklk.microone.service.impl.MessageServiceImpl;
 import ru.maiklk.microone.util.ConverterDto;
@@ -32,32 +32,45 @@ public class ConsumerService {
     IndividualServiceImpl individualService;
     MessageServiceImpl messageService;
 
+    @RetryableTopic(
+            backoff = @Backoff(delay = 1000, multiplier = 2.0),
+            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
+    )
     @KafkaListener(topics = TOPIC_USER, groupId = GROUP_ID)
     public void consumerUser(String message) {
-        IndividualDto dto = converterDto.convertToUserVkDto(message);
-        individualService.save(converterDto.fromDtoToIndividual(dto));
-        log.info(dto.toString());
+        try {
+            TelegramUserDto dto = converterDto.convertToUserVkDto(message);
+            individualService.save(converterDto.fromDtoToIndividual(dto));
+            log.info(dto.toString());
+        } catch (Exception e) {
+            dlt(message, TOPIC_USER);
+            error(e, TOPIC_USER, message);
+        }
     }
 
-    @KafkaListener(topics = TOPIC_MESSAGE, groupId = GROUP_ID)
-    public void consumerMessage(String message) {
-        MessageDto dto = converterDto.convertToMessageDto(message);
-        messageService.save(converterDto.fromDtoToMessage(dto));
-        log.info(dto.toString());
-    }
-
-    //паттерн ретрай и DLQ
     @RetryableTopic(
-            backoff = @Backoff(delay = 1000, multiplier = 5.0),
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
+            backoff = @Backoff(delay = 1000, multiplier = 2.0),
+            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
+    )
     @KafkaListener(topics = TOPIC_MESSAGE, groupId = GROUP_ID)
-    public void listen(String in, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.warn("{} from {}", in, topic);
-        throw new RuntimeException("ERROR!!!!");
+    public void consumerMessage(String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        try {
+            MessageDto dto = converterDto.convertToMessageDto(message);
+            messageService.save(converterDto.fromDtoToMessage(dto));
+            log.info("Сообщение успешно обработано: {} из топика {}", dto, topic);
+        } catch (Exception e) {
+            dlt(message, TOPIC_MESSAGE);
+            error(e, TOPIC_MESSAGE, message);
+        }
     }
 
     @DltHandler
     public void dlt(String in, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.error("{} from {}", in, topic);
+    }
+
+    private Exception error(Exception e, String topic, String message) {
+        log.error("Ошибка при обработке сообщения из топика {}: {}. Сообщение: {}", topic, e.getMessage(), message, e);
+        throw new RuntimeException(e);
     }
 }

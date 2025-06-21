@@ -1,7 +1,6 @@
-package ru.maiklk.microtwo.dto.impl;
+package ru.maiklk.microone.dto;
 
 import lombok.Builder;
-import ru.maiklk.microtwo.dto.AbstractDto;
 
 @Builder
 public record TelegramUserDto(
@@ -10,5 +9,5 @@ public record TelegramUserDto(
         String lastName,
         String userName,
         String languageCode
-) implements AbstractDto {
+) {
 }

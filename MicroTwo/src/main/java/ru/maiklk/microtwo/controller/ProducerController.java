@@ -8,23 +8,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
 import ru.maiklk.microtwo.dto.impl.MessageDto;
-import ru.maiklk.microtwo.service.KafkaService;
+import ru.maiklk.microtwo.kafka.ProducerService;
 
 @RestController
 @RequiredArgsConstructor
 public class ProducerController {
 
-    private final KafkaService kafkaService;
+    private final ProducerService producerService;
 
     @PostMapping("/sendIndividual")
     public ResponseEntity<String> sendMessage(@RequestBody TelegramUserDto dto) {
-        kafkaService.send(dto);
+        producerService.send(dto);
         return new ResponseEntity<>("TelegramUser send", HttpStatus.OK);
     }
 
     @PostMapping("/sendMessage")
     public ResponseEntity<String> sendMessage(@RequestBody MessageDto dto) {
-        kafkaService.send(dto);
+        producerService.send(dto);
         return new ResponseEntity<>("Message send", HttpStatus.OK);
     }
 }

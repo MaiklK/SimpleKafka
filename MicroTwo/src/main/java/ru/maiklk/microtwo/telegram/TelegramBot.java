@@ -1,7 +1,6 @@
 package ru.maiklk.microtwo.telegram;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,20 +13,20 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.maiklk.microtwo.config.BotConfig;
 import ru.maiklk.microtwo.dto.impl.MessageDto;
 import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
-import ru.maiklk.microtwo.service.KafkaService;
+import ru.maiklk.microtwo.kafka.ProducerService;
 
 @Component
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TelegramBot extends TelegramLongPollingBot {
     BotConfig botConfig;
-    KafkaService kafkaService;
+    ProducerService producerService;
 
     @Autowired
-    public TelegramBot(BotConfig botConfig, KafkaService kafkaService) {
+    public TelegramBot(BotConfig botConfig, ProducerService producerService) {
         super(botConfig.getTOKEN());
         this.botConfig = botConfig;
-        this.kafkaService = kafkaService;
+        this.producerService = producerService;
     }
 
     @Override
@@ -45,11 +44,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             if ("/start".equals(message.getText())) {
                 sendMessage(message.getChatId());
-                kafkaService.send(user);
+                producerService.send(user);
             } else {
                 replyMessage(message.getChatId(), message.getMessageId());
             }
-            kafkaService.send(messageDto);
+            producerService.send(messageDto);
         }
     }
 

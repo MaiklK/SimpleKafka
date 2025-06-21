@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.maiklk.microone.dto.IndividualDto;
 import ru.maiklk.microone.dto.MessageDto;
+import ru.maiklk.microone.dto.TelegramUserDto;
 import ru.maiklk.microone.entity.Message;
 import ru.maiklk.microone.entity.TelegramUser;
 
@@ -30,16 +30,16 @@ public class ConverterDto {
         }
     }
 
-    public IndividualDto convertToUserVkDto(String json) {
-        return fromJson(json, IndividualDto.class);
+    public TelegramUserDto convertToUserVkDto(String json) {
+        return fromJson(json, TelegramUserDto.class);
     }
 
     public MessageDto convertToMessageDto(String json) {
         return fromJson(json, MessageDto.class);
     }
 
-    public TelegramUser fromDtoToIndividual(IndividualDto individualDto) {
-        return modelMapper.map(individualDto, TelegramUser.class);
+    public TelegramUser fromDtoToIndividual(TelegramUserDto telegramUserDto) {
+        return modelMapper.map(telegramUserDto, TelegramUser.class);
     }
 
     public Message fromDtoToMessage(MessageDto messageDto) {

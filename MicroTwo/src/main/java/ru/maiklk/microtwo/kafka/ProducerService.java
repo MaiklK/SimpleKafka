@@ -1,4 +1,4 @@
-package ru.maiklk.microtwo.service;
+package ru.maiklk.microtwo.kafka;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +10,7 @@ import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
 
 @Service
 @RequiredArgsConstructor
-public class KafkaService {
+public class ProducerService {
     private final KafkaTemplate<String, AbstractDto> kafkaIndividual;
 
     @Value("${topic_user}")

@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.maiklk.microone.dto.MessageDto;
-import ru.maiklk.microone.dto.TelegramUserDto;
+import ru.maiklk.microone.dto.impl.MessageDto;
+import ru.maiklk.microone.dto.impl.TelegramUserDto;
 import ru.maiklk.microone.entity.Message;
 import ru.maiklk.microone.entity.TelegramUser;
 

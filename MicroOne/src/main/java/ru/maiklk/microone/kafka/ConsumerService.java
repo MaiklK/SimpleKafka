@@ -13,8 +13,11 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
-import ru.maiklk.microone.dto.MessageDto;
-import ru.maiklk.microone.dto.TelegramUserDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.maiklk.microone.dto.AbstractDto;
+import ru.maiklk.microone.dto.impl.MessageDto;
+import ru.maiklk.microone.dto.impl.TelegramUserDto;
+import ru.maiklk.microone.exception.KafkaMessageProcessingException;
 import ru.maiklk.microone.service.impl.IndividualServiceImpl;
 import ru.maiklk.microone.service.impl.MessageServiceImpl;
 import ru.maiklk.microone.util.ConverterDto;
@@ -32,6 +35,7 @@ public class ConsumerService {
     IndividualServiceImpl individualService;
     MessageServiceImpl messageService;
 
+    @Transactional
     @RetryableTopic(
             backoff = @Backoff(delay = 1000, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
@@ -41,13 +45,13 @@ public class ConsumerService {
         try {
             TelegramUserDto dto = converterDto.convertToUserVkDto(message);
             individualService.save(converterDto.fromDtoToIndividual(dto));
-            log.info(dto.toString());
+            logSuccess(dto, TOPIC_USER);
         } catch (Exception e) {
-            dlt(message, TOPIC_USER);
-            error(e, TOPIC_USER, message);
+            handleProcessingError(e, TOPIC_USER, message);
         }
     }
 
+    @Transactional
     @RetryableTopic(
             backoff = @Backoff(delay = 1000, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
@@ -57,10 +61,9 @@ public class ConsumerService {
         try {
             MessageDto dto = converterDto.convertToMessageDto(message);
             messageService.save(converterDto.fromDtoToMessage(dto));
-            log.info("Сообщение успешно обработано: {} из топика {}", dto, topic);
+            logSuccess(dto, TOPIC_MESSAGE);
         } catch (Exception e) {
-            dlt(message, TOPIC_MESSAGE);
-            error(e, TOPIC_MESSAGE, message);
+            handleProcessingError(e, TOPIC_MESSAGE, message);
         }
     }
 
@@ -69,8 +72,13 @@ public class ConsumerService {
         log.error("{} from {}", in, topic);
     }
 
-    private Exception error(Exception e, String topic, String message) {
+    private void logSuccess(AbstractDto dto, String topic) {
+        log.info("Сообщение успешно обработано: {} из топика {}", dto, topic);
+    }
+
+    private void handleProcessingError(Exception e, String topic, String message) {
         log.error("Ошибка при обработке сообщения из топика {}: {}. Сообщение: {}", topic, e.getMessage(), message, e);
-        throw new RuntimeException(e);
+        dlt(message, topic);
+        throw new KafkaMessageProcessingException(e.getMessage(), e);
     }
 }

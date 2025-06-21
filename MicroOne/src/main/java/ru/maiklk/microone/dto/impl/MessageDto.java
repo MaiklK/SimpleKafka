@@ -1,7 +1,7 @@
-package ru.maiklk.microtwo.dto.impl;
+package ru.maiklk.microone.dto.impl;
 
 import lombok.Builder;
-import ru.maiklk.microtwo.dto.AbstractDto;
+import ru.maiklk.microone.dto.AbstractDto;
 
 @Builder
 public record MessageDto(
@@ -11,4 +11,3 @@ public record MessageDto(
         String text
 ) implements AbstractDto {
 }
-

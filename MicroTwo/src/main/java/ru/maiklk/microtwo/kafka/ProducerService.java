@@ -11,7 +11,7 @@ import ru.maiklk.microtwo.dto.impl.TelegramUserDto;
 @Service
 @RequiredArgsConstructor
 public class ProducerService {
-    private final KafkaTemplate<String, AbstractDto> kafkaIndividual;
+    private final KafkaTemplate<String, AbstractDto> kafkaTemplate;
 
     @Value("${topic_user}")
     private String TOPIC_USER;
@@ -20,10 +20,10 @@ public class ProducerService {
 
     public void send(AbstractDto abstractDto) {
         if (abstractDto instanceof TelegramUserDto) {
-            kafkaIndividual.send(TOPIC_USER, abstractDto);
+            kafkaTemplate.send(TOPIC_USER, abstractDto);
         }
         if (abstractDto instanceof MessageDto) {
-            kafkaIndividual.send(TOPIC_MESSAGE, abstractDto);
+            kafkaTemplate.send(TOPIC_MESSAGE, abstractDto);
         }
     }
 }

@@ -16,7 +16,7 @@ public class ProducerController {
 
     private final ProducerService producerService;
 
-    @PostMapping("/sendIndividual")
+    @PostMapping("/sendTelegramUser")
     public ResponseEntity<String> sendMessage(@RequestBody TelegramUserDto dto) {
         producerService.send(dto);
         return new ResponseEntity<>("TelegramUser send", HttpStatus.OK);

@@ -57,7 +57,7 @@ public class ConsumerService {
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
     )
     @KafkaListener(topics = TOPIC_MESSAGE, groupId = GROUP_ID)
-    public void consumerMessage(String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    public void consumerMessage(String message) {
         try {
             MessageDto dto = converterDto.convertToMessageDto(message);
             messageService.save(converterDto.fromDtoToMessage(dto));

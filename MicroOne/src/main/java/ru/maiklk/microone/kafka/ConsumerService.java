@@ -7,18 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.maiklk.microone.dto.AbstractDto;
 import ru.maiklk.microone.dto.impl.MessageDto;
 import ru.maiklk.microone.dto.impl.TelegramUserDto;
 import ru.maiklk.microone.exception.KafkaMessageProcessingException;
-import ru.maiklk.microone.service.impl.TelegramUserServiceImpl;
 import ru.maiklk.microone.service.impl.MessageServiceImpl;
+import ru.maiklk.microone.service.impl.TelegramUserServiceImpl;
 import ru.maiklk.microone.util.ConverterDto;
 
 @Service
@@ -27,23 +25,20 @@ import ru.maiklk.microone.util.ConverterDto;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConsumerService {
 
-    private static final String TOPIC_USER = "${topic_user}";
-    private static final String TOPIC_MESSAGE = "${topic_message}";
-    private static final String GROUP_ID = "${group_id}";
+    private static final String TOPIC_USER = "${kafka.topic_user}";
+    private static final String TOPIC_MESSAGE = "${kafka.topic_message}";
+    private static final String GROUP_ID = "${kafka.group_id}";
     ConverterDto converterDto;
-    TelegramUserServiceImpl individualService;
+    TelegramUserServiceImpl telegramUserService;
     MessageServiceImpl messageService;
 
     @Transactional
-    @RetryableTopic(
-            backoff = @Backoff(delay = 1000, multiplier = 2.0),
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
-    )
+    @RetryableTopic
     @KafkaListener(topics = TOPIC_USER, groupId = GROUP_ID)
-    public void consumerUser(String message) {
+    public void sendTelegramUser(String message) {
         try {
-            TelegramUserDto dto = converterDto.convertToTelegramUserDto(message);
-            individualService.saveMessage(converterDto.fromDtoToTelegramUser(dto));
+            TelegramUserDto dto = converterDto.parseTelegramUserDto(message);
+            telegramUserService.saveEntity(converterDto.mapToTelegramUser(dto));
             logSuccess(dto, TOPIC_USER);
         } catch (Exception e) {
             handleProcessingError(e, TOPIC_USER, message);
@@ -51,15 +46,12 @@ public class ConsumerService {
     }
 
     @Transactional
-    @RetryableTopic(
-            backoff = @Backoff(delay = 1000, multiplier = 2.0),
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
-    )
+    @RetryableTopic
     @KafkaListener(topics = TOPIC_MESSAGE, groupId = GROUP_ID)
-    public void consumerMessage(String message) {
+    public void sendMessage(String message) {
         try {
-            MessageDto dto = converterDto.convertToMessageDto(message);
-            messageService.saveMessage(converterDto.fromDtoToMessage(dto));
+            MessageDto dto = converterDto.parseMessageDto(message);
+            messageService.saveEntity(converterDto.mapToMessage(dto));
             logSuccess(dto, TOPIC_MESSAGE);
         } catch (Exception e) {
             handleProcessingError(e, TOPIC_MESSAGE, message);

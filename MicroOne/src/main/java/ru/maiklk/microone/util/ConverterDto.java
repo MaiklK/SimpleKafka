@@ -20,28 +20,28 @@ public class ConverterDto {
     ObjectMapper objectMapper;
     ModelMapper modelMapper;
 
-    public <T> T fromJson(String json, Class<T> clazz) {
+    public TelegramUserDto parseTelegramUserDto(String json) {
+        return fromJson(json, TelegramUserDto.class);
+    }
+
+    public MessageDto parseMessageDto(String json) {
+        return fromJson(json, MessageDto.class);
+    }
+
+    public TelegramUser mapToTelegramUser(TelegramUserDto telegramUserDto) {
+        return modelMapper.map(telegramUserDto, TelegramUser.class);
+    }
+
+    public Message mapToMessage(MessageDto messageDto) {
+        return modelMapper.map(messageDto, Message.class);
+    }
+
+    private <T> T fromJson(String json, Class<T> clazz) {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
             log.error("Не удалось конвертировать Json в объект {}: {}", clazz.getSimpleName(), e.getMessage());
             throw new RuntimeException("Ошибка конвертации JSON в " + clazz.getSimpleName(), e);
         }
-    }
-
-    public TelegramUserDto convertToTelegramUserDto(String json) {
-        return fromJson(json, TelegramUserDto.class);
-    }
-
-    public MessageDto convertToMessageDto(String json) {
-        return fromJson(json, MessageDto.class);
-    }
-
-    public TelegramUser fromDtoToTelegramUser(TelegramUserDto telegramUserDto) {
-        return modelMapper.map(telegramUserDto, TelegramUser.class);
-    }
-
-    public Message fromDtoToMessage(MessageDto messageDto) {
-        return modelMapper.map(messageDto, Message.class);
     }
 }

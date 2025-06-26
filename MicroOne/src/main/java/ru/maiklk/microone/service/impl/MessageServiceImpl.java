@@ -14,13 +14,17 @@ import ru.maiklk.microone.service.SaveEntity;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MessageServiceImpl implements SaveEntity<Message> {
+    private static final int MAX_MESSAGE_LENGTH = 200;
     MessageRepo messageRepo;
 
     @Override
-    public void saveMessage(Message message) {
+    public void saveEntity(Message message) {
         if (message == null) {
             log.error("Сообщение не должно быть null");
             return;
+        }
+        if (message.getText().length() > MAX_MESSAGE_LENGTH) {
+            message.setText(message.getText().substring(0, MAX_MESSAGE_LENGTH));
         }
         try {
             messageRepo.save(message);

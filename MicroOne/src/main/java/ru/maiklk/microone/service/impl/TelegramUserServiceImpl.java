@@ -17,7 +17,7 @@ public class TelegramUserServiceImpl implements SaveEntity<TelegramUser> {
     TelegramUserRepo telegramUserRepo;
 
     @Override
-    public void saveMessage(TelegramUser telegramUser) {
+    public void saveEntity(TelegramUser telegramUser) {
         if (telegramUser == null) {
             log.error("Пользователь не должен быть null");
             return;

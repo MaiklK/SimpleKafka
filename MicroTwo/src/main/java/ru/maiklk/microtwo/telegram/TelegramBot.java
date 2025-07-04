@@ -44,7 +44,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             if ("/start".equals(message.getText())) {
                 producerService.send(telegramUserDto);
-                sendMessage(message.getChatId());
+                sendStartMessage(message.getChatId());
             } else {
                 producerService.send(messageDto);
                 replyMessage(message.getChatId(), message.getMessageId());
@@ -79,7 +79,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         executeSendMessage(sendMessage);
     }
 
-    private void sendMessage(long chatId) {
+    private void sendStartMessage(long chatId) {
         SendMessage sendMessage = new SendMessage(String.valueOf(chatId),
                 "Заработало!!!\uD83C\uDF8A\uD83C\uDF8A\uD83C\uDF8A\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89");
         executeSendMessage(sendMessage);

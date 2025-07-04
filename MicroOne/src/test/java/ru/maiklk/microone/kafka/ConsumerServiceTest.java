@@ -1,11 +1,11 @@
 package ru.maiklk.microone.kafka;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.maiklk.microone.dto.impl.MessageDto;
 import ru.maiklk.microone.dto.impl.TelegramUserDto;
 import ru.maiklk.microone.entity.Message;
@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Тесты для ConsumerService")
+@ExtendWith(MockitoExtension.class)
 class ConsumerServiceTest {
 
     @InjectMocks
@@ -33,11 +34,6 @@ class ConsumerServiceTest {
 
     @Mock
     MessageServiceImpl messageServiceImpl;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     @DisplayName("Успешная обработка пользователя Telegram")
